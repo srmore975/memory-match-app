@@ -50,9 +50,9 @@ Flip the cards, remember where the pictures are, and match all the pairs to win!
 
 🔊 KID-FRIENDLY
 • Big, colorful cartoon cards
-• Soothing sounds and voice (can be switched off)
+• Soothing sounds and voice
 • Hint button for help
-• No ads. No in-app purchases. No internet needed to play.
+• Designed for families: ads are family-safe and non-personalized
 
 Made with care for kids of all ages. Play today and grow your memory muscles!
 ```

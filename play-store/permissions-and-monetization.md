@@ -24,17 +24,20 @@ Declare only what the wrapper actually uses. **Do not** add camera, microphone, 
 ## 2. Monetization
 
 - **Payment model.** Announced: **Free**.
-- **Does the app contain ads?** **No.**
+- **Does the app contain ads?** **Yes** — AdMob banner (top) + interstitial after each completed game.
 - **Are there in-app purchases / subscriptions?** **No** — the app has no billing integration; stickers and coins are earned by playing.
-- **Does the app use any ad SDK or analytics SDK?** **No.**
+- **Ad SDK used:** `com.google.android.gms:play-services-ads` (Google Mobile Ads / AdMob).
+- **Ad targeting:** non-personalized, child-directed (`RequestConfiguration.TAG_FOR_CHILD_DIRECTED_TREATMENT_TRUE`, max content rating **T**).
 
 ### Play Console questions
 
 | Question | Answer |
 |---|---|
-| Is your app monetized? | **No** (free, no purchases, no ads) |
-| Does the app use ads (incl. House ads)? | **No** |
-| Do you need to enable "Ads" content checkbox? | **No — leave unchecked** |
+| Is your app monetized? | **Yes — ads (free)** |
+| Does the app use ads? | **Yes — AdMob banner + interstitial** |
+| Do you need to enable "Ads" content checkbox? | **Yes — tick it** |
+
+> You must link your AdMob account to this Play app (**AdMob → Apps → Link to Play Console**) and complete the **"Apps with children"** setup in AdMob so only family-safe ad networks can fill.
 
 ---
 

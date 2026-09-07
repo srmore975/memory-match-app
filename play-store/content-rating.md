@@ -54,9 +54,10 @@ Answers for the Play Console **Content rating** section. Answer the IARC questio
 
 Because you will mark the app as aimed at children, the app is subject to the **Play Families Policy**:
 
-- No ads using advertising identifiers or behavioral targeting.
+- Ads must be **non-personalized** and from family-safe networks. This app already forces child-directed, non-personalized ads in code (`RequestConfiguration.TAG_FOR_CHILD_DIRECTED_TREATMENT_TRUE`, max content rating T).
+- In **AdMob**, complete the **"Apps with children"** questionnaire and link the app to its Play listing.
 - No social features, chat, or UGC.
 - No incentivized sharing.
-- Data safety declaration must confirm "No data is collected" (matches the app — see `data-safety.md`).
+- Data safety declaration must disclose the AdMob ad SDK (see `data-safety.md`).
 
-The app currently satisfies all of these (no ads, no login, no chat, no data collection).
+The app currently satisfies all of these (only AdMob, non-personalized, no chat/UGC).

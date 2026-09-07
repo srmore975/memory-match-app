@@ -1,6 +1,6 @@
-# Data Safety Form — Memory Match! Cartoon Fun
+# Data Safety Form — Memory Match! Cartoon Fun (with AdMob)
 
-Answers for the Play Console **Data safety** section (App content → Data safety). The app collects **no data**, so this form is short and simple.
+Answers for the Play Console **Data safety** section (App content → Data safety). Because the app **displays ads from AdMob**, you must now disclose ad-related data. This is mandatory — Play rejects apps that claim "no data" while serving ads.
 
 ---
 
@@ -8,56 +8,36 @@ Answers for the Play Console **Data safety** section (App content → Data safet
 
 ### 1. Does your app collect or share any of the required user data types?
 
-**No**
+**Yes** — but only the data that Google Mobile Ads (AdMob) handles for ad delivery.
 
-Confirm in the form: "Apps must disclose collection and sharing of user data, whether the data is transmitted off device or not." Local-only data such as game coins/stickers stored in local web storage is **not** one of the disclosed data types and does not need to be listed.
+| Category | Collected? | Shared? | Notes |
+|---|---|---|---|
+| Device or other IDs | **Yes** | **Yes** | Advertising ID (GAID) handled by the AdMob SDK for ad delivery |
+| App activity — ad impressions | **Yes** | **Yes** | Ad views/impressions for billing and reporting |
+| All other categories (location, personal info, financial, health, messages, photos, audio, files, contacts, calendar, web browsing) | **No** | **No** | — |
 
-### 2. Data collection
+### 2. Data sharing (Policies)
 
-For every one of these categories choose **Not collected / No**:
-
-- Location
-- Personal info (name, email, phone, address, personal IDs, etc.)
-- Financial info
-- Health & fitness
-- Messages
-- Photos & videos
-- Audio files
-- Files & docs
-- Contacts
-- Calendar
-- App activity (page views, in-app search history, installed apps, etc.)
-- Web browsing history
-- Device or other identifiers (device IDs, advertising IDs, cookies)
-
-### 3. Data shared
-
-**No data is shared** — because no data is collected, nothing can be shared. Mark "No" for every category in the sharing section too.
-
-### 4. Deceptive practices / "Is the data encrypted?"
-
-Not applicable — leave as "no data" (the form hides encryption questions when no data is declared).
+- **Is data shared for advertising/personalization?** No — the app requests **non-personalized, child-directed ads** (`TAG_FOR_CHILD_DIRECTED_TREATMENT_TRUE` + max content rating T set globally).
+- **Is the data encrypted in transit?** **Yes** — AdMob traffic is HTTPS.
+- **Can users request data deletion?** **Yes** — in-app **Parents → Reset Data**, or uninstall/clear app data.
 
 ---
 
-## Section 2: Security practices
+## Section 3: Ads declaration (required)
 
-| Question | Answer |
-|---|---|
-| Is all data encrypted in transit? | **Yes — N/A (no network data is transmitted by the app beyond standard font requests served over HTTPS)** |
-| Can users request data deletion? | **Yes** — parents can use **Parents → Reset Data** in the app, or uninstall/clear app data |
+Play Console will ask separately (in App content → Ads):
 
-Note: choose **Yes** for "all data in transit is encrypted" only if the app communicates over HTTPS. The only network call is the HTTPS Google Fonts request, so this is satisfied. If you strip fonts/network entirely, answer "Not applicable — app doesn't transmit data."
-
----
-
-## Section 3: Play Families compliance
-
-- The declared data handling must match the integrity of the Play Families requirements: **no data collected** is the strongest compliant statement, and it is accurate for this app.
-- Keep this section consistent with `content-rating.md` (marketing the app as a kids' app).
+- **Does your app contain ads?** **Yes**
+- Platforms: ads are shown on **Google Play only** (Android native AdMob banner + interstitial).
+- Ad types: banner (top of screen) and interstitial ad after a completed game. No rewarded video.
+- The ad SDK is **Google Mobile Ads (AdMob)**.
 
 ---
 
-## What to paste/summarize for users (optional)
+## Section 4: Play Families impact (you are targeting kids)
 
-> This app does not collect or share any user data. All game progress (coins, stickers, scores) is stored only on your device.
+- **Non-personalized ads** must be used for children (this app does).
+- AdMob must be linked to the Play listing via **AdMob → Apps → Link to Play Console**, and the AdMob account must run ads under **"Apps with children"** / the Families policy review.
+- No interest-based/behavioral ad targeting (already disabled in code via RequestConfiguration).
+- The content rating **Everyone / PEGI 3** is unchanged by ads (ads are a data/monetization concern, not a rating category).

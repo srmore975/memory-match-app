@@ -1,107 +1,80 @@
-# Publishing Guide — Memory Match! Cartoon Fun
+# Publishing Guide — Memory Match! Cartoon Fun (with AdMob)
 
-This app is an HTML5/PWA game. To list it on the Google Play Store you must wrap it in a real Android app. Below are the two supported routes, then the full Play Console checklist.
+This is an HTML5/PWA game wrapped in a WebView Android app (package `com.legacy.memorymatchgame`). It monetizes with **AdMob** ads. Below is the full end-to-end path to production.
 
-> **Prereq for both routes:** the app files (`memory-game.html`, `manifest.json`, `app-icons/`) must be hosted over **HTTPS**. Free options: GitHub Pages, Netlify Drop, Cloudflare Pages, or your own host. The privacy policy (`privacy-policy.html`) can be hosted on the same site.
-
----
-
-## Option A — Recommended: Trusted Web Activity via Bubblewrap (official Google tool)
-
-Keeps your PWA behavior (manifest, icons, standalone).
-
-1. Install Node.js and JDK 17+. Then:
-   ```bash
-   npx @bubblewrap/cli init
-   ```
-2. Answer the wizard:
-   - **Web app manifest:** `https://your-hosted-url/manifest.json` (or local path)
-   - **Application name:** Memory Match! Cartoon Fun
-   - **Package name:** e.g. `com.yourstudio.memorymatch`
-   - **Signing key:** generate a new one; keep the keystore file + passwords safe — you need them for every future release.
-3. Build:
-   ```bash
-   npx @bubblewrap/cli build
-   ```
-4. Output: a signed `.apk`/`.aab` in `app-release-signed` / `bundle`. Upload the **`.aab`** to Play Console.
-
-**Note:** Bubblewrap requires a hosted HTTPS manifest URL at build time. If you can't host yet, use Option B.
+> **Prereq:** an AdMob account and a Play Console developer account, both using the same Google account (srmore975@gmail.com). A .aab build (`MemoryMatchApp\dist\MemoryMatch-Game-v1.0-ads.aab`) is already produced for you.
 
 ---
 
-## Option B — Simple WebView wrapper (no hosting needed)
+## Part 0 — One-time AdMob setup (do this FIRST)
 
-1. Open Android Studio → New Project → **Empty Views Activity** (Java) or **Empty Activity** (Kotlin).
-2. Set:
-   - `minSdk 21`, `targetSdk` = latest stable.
-   - App name (`strings.xml`): **Memory Match! Cartoon Fun**
-   - App icon: use `app-icons/icon-512.png` (add as mipmap/webp).
-3. Replace the layout with a single `WebView` filling the screen:
-   ```kotlin
-   val web = WebView(this)
-   web.settings.javaScriptEnabled = true
-   web.settings.domStorageEnabled = true       // needed for localStorage (coins, stickers, score)
-   web.settings.mediaPlaybackRequiresUserGesture = false
-   web.loadUrl("file:///android_asset/memory-game.html")
-   setContentView(web)
+1. Go to **admob.google.com** and sign in with **srmore975@gmail.com**.
+2. **Apps → Add app → Android →** enter package **`com.legacy.memorymatchgame`** → link it to the Play listing when prompted.
+3. **App settings →** complete the **"Apps with children"** questionnaire → this makes Google only allow **family-safe ad networks**.
+4. Create **two ad units**:
+   - **Banner** (320×50 adaptive) — name "Game Banner"
+   - **Interstitial** — name "Game Interstitial"
+5. Copy the two **real ad unit IDs** (`ca-app-pub-.../...`) into `MemoryMatchApp\app\src\main\java\com\legacy\memorymatchgame\AdsManager.java` (`BANNER_ID`, `INTERSTITIAL_ID`).
+6. Copy your real **App ID** (`ca-app-pub-...~...`) into `MemoryMatchApp\app\src\main\AndroidManifest.xml` (`com.google.android.gms.ads.APPLICATION_ID`).
+7. Rebuild:
+   ```powershell
+   .\gradlew.bat assembleRelease bundleRelease
    ```
-   Copy `memory-game.html`, `manifest.json`, and `app-icons/` into `src/main/assets/`.
-4. In the manifest add:
-   ```xml
-   <uses-permission android:name="android.permission.INTERNET"/>
-   ```
-   (Omit it if you strip the Google-Fonts import and run fully offline.)
-5. Enable `Back` to exit cleanly (optional `.goBack()` handling). Build → **Generate Signed Bundle (.aab)** → upload to Play Console.
+   Outputs land in `app\build\outputs\...`. 
 
-> Package name suggestion: make it unique, e.g. `com.yourstudio.memorymatch`. Names cannot be changed after publishing.
+> Tip: keep the current **test** ad unit IDs while testing — real IDs serve no ads on unapproved apps anyway.
 
 ---
 
-## Google Play Console checklist (final publishing steps)
+## Part 1 — Developer account
 
-### 1. Create the developer account
-- Sign in at play.google.com/console and pay the **one-time $25 USD** registration fee.
-- Complete identity verification and tax details.
+1. Go to **play.google.com/console** and sign in with srmore975@gmail.com.
+2. Pay the **one-time $25 USD** registration fee and complete identity/tax verification.
+3. Developer name: **Legacy Co.**
 
-### 2. Create the app
-- Console → **Create app** → Name: **Memory Match! Cartoon Fun**, Language: English (US), App or Game: **Game**, Free, all default countries. → Create.
+## Part 2 — Create the app
 
-### 3. Complete the launch checklist (left sidebar, top to bottom)
+1. **Create app →** Name **Memory Match! Cartoon Fun**, English (US), **Game**, **Free**, all countries. → **Create**.
 
-**Store presence**
-- Main store listing → paste texts from `store-listing.md`. Upload **English (US)** strings.
-- Graphic assets: high-res icon (512 PNG), **feature graphic 1024×500** (create it), **2–4 phone screenshots** (create from the game).
-- Contact: website, support email, and the **hosted privacy-policy URL**.
+## Part 3 — Store presence
 
-**App content**
-- **Privacy policy:** paste the public URL of `privacy-policy.html`.
-- **Ads / purchases:** No ads, No purchases (`permissions-and-monetization.md`).
-- **Content rating:** answer IARC per `content-rating.md` → expect "Everyone / PEGI 3".
-- **Target audience:** Kids/Families.
-- **Data safety:** per `data-safety.md` — No data collected/shared.
-- **Permissions:** none declared (+ optionally INTERNET only).
+1. **Main store listing →** paste text from `store-listing.md` (English US).
+2. Graphics: high-res icon (`app-icons/icon-512.png`), feature graphic (`play-store/feature-graphic-1024x500.png`), and **2–4 phone screenshots** (capture from the running game — still your job).
+3. Contact: website + support email + **privacy policy URL** (host `play-store/privacy-policy.html` publicly).
 
-**Production**
-- **Release overview → Production → Create release.**
-  - Upload your **`.aab`** (from Option A or B).
-  - "What's new" text from `whats-new.md`.
-  - Signing: enable **Google Play App Signing** (recommended) and store your upload key safely.
+## Part 4 — App content
 
-### 4. Review & publish
-- Run **Review** on each section; fix any warnings (usually: missing features graphic, missing screenshots, or privacy-policy URL required).
-- Roll out 100%. Within a few hours the app goes live (or is rejected for review — in which case address the listed reason and resubmit).
+1. **Privacy policy:** paste the public URL.
+2. **Ads:** tick "This app contains ads".
+3. **Content rating:** answer IARC per `content-rating.md`.
+4. **Target audience:** mark as aimed at children/families.
+5. **Data safety:** fill per `data-safety.md` — now discloses the **AdMob SDK**, advertising identifier, and ad impressions.
+6. **Permissions:** none declared (only INTERNET is implicit for ads; AdMob doesn't add runtime permissions).
+
+## Part 5 — Production release
+
+1. **Release overview → Production → Create release.**
+2. Upload **`MemoryMatchApp\dist\MemoryMatch-Game-v1.0-ads.aab`**.
+3. "What's new": text from `whats-new.md`.
+4. Enable **Google Play App Signing**; keep `release-keystore.jks` + `keystore.properties` safe (password `MemoryMatch2026`).
+5. **Review** every section, resolve warnings, then **Roll out (100%)**.
+
+## Part 6 — AdMob final steps (before revenue)
+
+1. AdMob **enter phone verification** + **complete payments profile** (tax/bank).
+2. AdMob → Signing your ad requests (Optional, recommended for validity signals) if you enable user metrics on Android.
+3. Within a few days Google will send an **"Apps with children" review** confirmation; make sure non-personalized ads remain forced (already done in code).
 
 ---
 
-## First-release cheat list (must not be missing)
+## First-release cheat list
 
-- ☐ Hosted `memory-game.html` over HTTPS
-- ☐ Hosted `privacy-policy.html` at a public URL
+- ☐ Real AdMob App ID in manifest + real unit IDs in AdsManager.java, rebuilt
+- ☐ `.aab` uploaded (Ads build), signed
 - ☐ Developer account + $25 fee
-- ☐ `.aab` built (Option A or B), signed
-- ☐ Feature graphic 1024×500
-- ☐ 2–4 phone screenshots
+- ☐ Privacy policy hosted at a public URL
+- ☐ Feature graphic + high-res icon + screenshots
 - ☐ Store text pasted
-- ☐ IARC content rating answered
-- ☐ Data safety answered ("no data")
-- ☐ "What's new" for first release added
+- ☐ Ads = Yes, content rating, target audience, data safety (ads disclosure) filled
+- ☐ Play Families "Apps with children" setup done in AdMob
+- ☐ AdMob payments profile completed

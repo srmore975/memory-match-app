@@ -10,7 +10,7 @@ _Last updated: September 7, 2026_
 
 Memory Match! Cartoon Fun ("the App") is a single-player memory matching game designed for children. We respect the privacy of every family and child who plays. This policy explains, in simple terms, what information the App collects and how it is handled.
 
-**The short version: the App does not collect, store, or share any personal information. Everything the game remembers stays on your child's device.**
+**The short version: the game itself never collects personal information, and everything the game remembers stays on your child's device. The only outside service is Google AdMob, which serves family-safe, non-personalized ads to keep the App free (details in section 3).**
 
 ---
 
@@ -43,9 +43,16 @@ This data is stored **only on the device** using the device's standard local web
 
 ---
 
-## 3. Third parties
+## 3. Third parties (advertising)
 
-The App contains **no third-party advertising, no analytics SDKs, and no crash-reporting services**. There is nothing in the App that sends your data to advertisers or social networks.
+The App displays ads from **Google AdMob** (a service of Google LLC) to help keep the App free:
+
+- **What the ad service sees:** when an ad is shown, Google's ad SDK may receive the device's **advertising identifier**, your network information (such as IP address), and anonymous ad impression/click data. This flows between your device and Google under **Google's Privacy Policy**.
+- **Children's ads:** this App is built for families. Ads are served as **non-personalized** requests with a **maximum content rating of "T" (Teen) or lower**, and the ad SDK is configured with child-directed treatment. No interest-based or behavioral advertising is used.
+- **Ad formats:** a banner ad at the top of some screens, and a full-screen ad occasionally after you finish a game.
+- **Opting out (for parents):** you can delete the App at any time. Parents can also disable advertising personalization at the system level in device settings (Ads → opt out of personalization).
+
+The App itself contains **no other third-party analytics, crash-reporting, or advertising services** beyond AdMob.
 
 ---
 
@@ -60,11 +67,11 @@ The App requests **no sensitive device permissions** (no camera, microphone, con
 The App complies with child-privacy laws including the U.S. Children's Online Privacy Protection Act (COPPA) and the EU General Data Protection Regulation for children (GDPR-K):
 
 - No personal information is collected from children.
-- No persistent identifiers are used for tracking.
+- Only the Google AdMob ad SDK runs in the App, serving **non-personalized**, child-directed ads (see section 3). Personalized/behavioral advertising is disabled.
 - No social features, chat, or user-generated content exist in the App.
 - There is no way for a child to contact others or share content outside the App.
 
-Because the App processes no personal data, there is nothing to retain, and no consent is required for data processing.
+Because the App itself collects no personal data and ads are non-personalized, there is nothing to retain, and no consent is required for data processing.
 
 ---
 
