@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#ff4d6d">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="icon" type="image/png" href="app-icons/favicon-48.png">
+  <link rel="apple-touch-icon" href="app-icons/apple-touch-icon-180.png">
+  <link rel="manifest" href="manifest.json">
+  <title>Memory Match! Cartoon Fun</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@600;800&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    html { height: 100%; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      color: #4a2b3f;
+      overflow-x: hidden;
+      min-height: calc(100vh + 1px);
+      padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+      transition: background 0.5s;
+      position: relative;
+    }
+
+    body.theme-animals { background: linear-gradient(180deg, #8ec5fc 0%, #c3ecff 45%, #e8fbe8 100%); }
+    body.theme-food    { background: linear-gradient(180deg, #ffc9de 0%, #ffe3ec 40%, #fff3c9 100%); }
+    body.theme-space   { background: linear-gradient(180deg, #1e1b4b 0%, #3b2f70 55%, #6d4fa3 100%); }
+    body.theme-dino    { background: linear-gradient(180deg, #aad6ff 0%, #ffe6b0 45%, #c8f7b0 100%); }
+
+    /* ===== Cartoon scene (SVG) ===== */
+    .scene {
+      position: fixed; bottom: 0; left: 0; width: 100%; height: min(42vh, 380px);
+      z-index: 0; pointer-events: none; overflow: visible;
+    }
+    .scene g { transition: opacity 0.5s; }
+    .scene .space-bits, .scene .dino-bits { opacity: 0; }
+    body.theme-space .scene .hills, body.theme-space .scene .sun, body.theme-space .scene .rainbow,
+    body.theme-dino .scene .hills, body.theme-dino .scene .sun, body.theme-dino .scene .rainbow { opacity: 0; }
+    body.theme-space .scene .space-bits { opacity: 1; }
+    body.theme-dino .scene .dino-bits { opacity: 1; }
+
+    .scene .hill-back { fill: #86d88b; }
+    .scene .hill-front { fill: #58c26b; }
+    body.theme-dino .scene .hill-back { fill: #f7c873; }
+    body.theme-dino .scene .hill-front { fill: #e0a94f; }
+    body.theme-food .scene .hill-back { fill: #ffd3e0; }
+    body.theme-food .scene .hill-front { fill: #ffb8cf; }
+
+    /* ===== Floating cartoon decorations ===== */
+    .floaties { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    .floaties span { position: absolute; font-size: 30px; animation: floaty 6s ease-in-out infinite; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.15)); }
+    .floaties .f1 { top: 14%; left: 6%; animation-delay: 0s; }
+    .floaties .f2 { top: 22%; right: 8%; animation-delay: 1.2s; }
+    .floaties .f3 { top: 42%; left: 10%; animation-delay: 2.1s; }
+    .floaties .f4 { top: 50%; right: 12%; animation-delay: 3s; }
+    body.theme-food .floaties .f1, body.theme-food .floaties .f2,
+    body.theme-food .floaties .f3, body.theme-food .floaties .f4 { animation-duration: 4.5s; }
+    @keyframes floaty { 0%,100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-16px) rotate(5deg); } }
+
+    /* ===== Status bar ===== */
+    .statusbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 18px; padding-top: max(8px, env(safe-area-inset-top, 0px));
+      background: linear-gradient(90deg, #ffd0dc, #cfe8ff);
+      color: #7a2b4d; font-size: 13px; font-weight: 800; letter-spacing: 0.3px;
+    }
+    .sb-icons { display: flex; align-items: center; gap: 5px; height: 16px; }
+    .sb-icons svg { display: block; fill: currentColor; height: 100%; }
+
+    /* ===== App bar ===== */
+    .appbar {
+      display: flex; align-items: center; justify-content: space-between;
+      background: linear-gradient(90deg, #ff6b9d, #fa8b5f);
+      padding: 12px 14px; padding-bottom: 20px;
+      border-bottom: 5px solid #fff; box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+    }
+    .appbar-title { display: flex; align-items: center; gap: 10px; font-family: 'Fredoka One', cursive; font-size: 22px; color: #fff; text-shadow: 2px 2px 0 rgba(0,0,0,0.15); }
+    .appbar-title .logo {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: #fff; border: 3px solid #fff;
+      display: flex; align-items: center; justify-content: center; font-size: 24px;
+      box-shadow: 0 3px 0 rgba(0,0,0,0.15);
+      transform: rotate(-6deg);
+    }
+    .coin-badge {
+      display: flex; align-items: center; gap: 5px;
+      background: #fff; color: #e8590c; padding: 7px 16px; border-radius: 999px;
+      font-weight: 800; font-size: 15px; box-shadow: 0 3px 0 rgba(0,0,0,0.15);
+    }
+    .icon-btn {
+      width: 42px; height: 42px; border: 3px solid #fff; border-radius: 50%; cursor: pointer;
+      background: rgba(255,255,255,0.35); color: #fff; font-size: 20px;
+    }
+    .icon-btn.voice-on { background: #fff; }
+
+    /* ===== Settings options ===== */
+    .set-group { margin: 0 0 18px; text-align: left; }
+    .set-label { font-family: 'Fredoka One', cursive; font-size: 16px; color: #b05be5; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+    .set-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .set-grid.tri { grid-template-columns: repeat(3, 1fr); }
+    .option {
+      background: #faf3ff; border: 3px solid #f0e0ff; border-radius: 20px;
+      padding: 12px 4px; cursor: pointer; text-align: center;
+      transition: transform 0.1s, background 0.1s, border 0.1s, box-shadow 0.1s;
+      -webkit-user-select: none; user-select: none;
+    }
+    .option:active { transform: scale(0.96); }
+    .option .oe { font-size: 30px; line-height: 1; filter: drop-shadow(1px 2px 1px rgba(0,0,0,0.15)); }
+    .option .on { font-weight: 800; font-size: 13px; color: #6d4a6d; margin-top: 6px; }
+    .option .od { font-size: 10px; color: #b07a8a; font-weight: 700; margin-top: 2px; }
+    .option.active { background: #fff0f4; border-color: #ff6b9d; box-shadow: 0 5px 0 rgba(255,77,109,0.35); }
+    .option.active .on { color: #ff4d6d; }
+    .option.active .od { color: #ff4d6d; }
+    @media (max-width: 360px) {
+      .set-grid.tri { grid-template-columns: 1fr; }
+    }
+
+    /* ===== Layout ===== */
+    .content { position: relative; z-index: 1; max-width: 600px; margin: 0 auto; padding: 10px 16px; }
+
+    /* ===== Mascot ===== */
+    .mascot { display: flex; align-items: center; gap: 12px; margin: 16px 0 12px; }
+    .face { font-size: 52px; filter: drop-shadow(0 5px 4px rgba(0,0,0,0.2)); animation: bob 2.4s ease-in-out infinite; }
+    .face.celebrate { animation: bounceIn 0.6s ease; }
+    .face.sad { transform: scaleX(-1) scale(0.92); }
+    .bubble {
+      flex: 1; background: rgba(255,255,255,0.95); border: 3px solid #fff;
+      border-radius: 22px; padding: 10px 18px; font-size: 14px; font-weight: 800; color: #6d4a6d;
+      box-shadow: 0 5px 0 rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.06);
+      position: relative; min-height: 48px;
+    }
+    .bubble::before {
+      content: ''; position: absolute; left: -12px; top: 55%;
+      border: 8px solid transparent; border-top-color: rgba(255,255,255,0.95);
+      transform: rotate(35deg);
+    }
+    .bubble.happy { color: #2b8a3e; }
+    .bubble.sad { color: #d9480f; }
+    .bubble.celebrate { color: #e8590c; }
+    @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+    /* ===== Score cards ===== */
+    .scoreboard { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+    .score-card {
+      background: rgba(255,255,255,0.95); border: 3px solid #fff; border-radius: 22px;
+      padding: 10px 8px; text-align: center;
+      box-shadow: 0 5px 0 rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.06);
+    }
+    .score-card:nth-child(1) { background: #fff0f4; }
+    .score-card:nth-child(2) { background: #eafff1; }
+    .score-card:nth-child(3) { background: #fffbe8; }
+    .score-card .label { font-size: 11px; font-weight: 800; color: #b07a8a; text-transform: uppercase; letter-spacing: 1px; }
+    .score-card .value { font-family: 'Fredoka One', cursive; font-size: 24px; color: #ff4d6d; font-variant-numeric: tabular-nums; }
+    .score-card:nth-child(2) .value { color: #37b24d; }
+    .score-card:nth-child(3) .value { color: #f08c00; }
+
+    .section-title { font-size: 13px; font-weight: 800; color: rgba(74,43,63,0.8); margin: 0 0 8px; letter-spacing: 1px; text-transform: uppercase; }
+
+    .settings-summary {
+      display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;
+      background: rgba(255,255,255,0.9); border: 3px solid #fff; border-radius: 999px;
+      padding: 8px 16px; margin: 4px 0 8px;
+      box-shadow: 0 4px 0 rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.06);
+      font-size: 12px; font-weight: 800; color: #6d4a6d;
+    }
+    .settings-summary .pill { display: inline-flex; align-items: center; gap: 4px; background: #fff0f4; color: #ff4d6d; border-radius: 999px; padding: 3px 10px; }
+    .settings-summary .pill:nth-child(2) { background: #eafff1; color: #2f9e44; }
+    .settings-summary .gear-hint { margin-left: 2px; font-size: 11px; color: #b07a8a; }
+
+    /* ===== Board / cards ===== */
+    .board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 0 auto 16px; perspective: 1000px; }
+
+    .card {
+      aspect-ratio: 1; cursor: pointer; position: relative; transform-style: preserve-3d;
+      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      animation: dealPop 0.45s ease backwards;
+    }
+    .card.flipped { transform: rotateY(180deg); }
+    .card.matched { animation: matchPop 0.5s ease; }
+    .card.nom .card-front { animation: nom 0.55s ease forwards; }
+    .card.wrong { animation: shake 0.45s ease; }
+    .card.wrong .card-front { background: #ffe3e3; }
+    .card.wrong .card-front > span { opacity: 0.45; }
+    .card.hint { transform: rotateY(180deg); }
+
+    .card-front, .card-back {
+      position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+      border-radius: 26px; display: flex; align-items: center; justify-content: center;
+    }
+    .card-back {
+      background: radial-gradient(120% 120% at 30% 25%, #a29bfe, #6c5ce7 70%);
+      border: 4px solid #fff;
+      box-shadow: 0 6px 0 rgba(0,0,0,0.22), 0 10px 20px rgba(0,0,0,0.12);
+      transition: transform 0.15s;
+    }
+    .card-back::before { content: '?'; font-family: 'Fredoka One', cursive; font-size: 30px; color: #fff; text-shadow: 3px 3px 0 rgba(0,0,0,0.35); }
+    .card-back::after {
+      content: '★'; position: absolute; font-size: 14px; color: rgba(255,255,255,0.5);
+      top: 8px; right: 10px; transform: rotate(15deg);
+    }
+    .card:not(.flipped):not(.matched):not(.hint):hover .card-back { transform: scale(1.05) rotate(-2deg); }
+    .card:not(.flipped):not(.matched):not(.hint):active .card-back { transform: scale(0.93); }
+    .card-front {
+      background: #fff; border: 4px solid #ffd166;
+      box-shadow: 0 6px 0 rgba(194,139,0,0.35), 0 10px 20px rgba(0,0,0,0.12);
+      transform: rotateY(180deg);
+      background-image: radial-gradient(circle at 80% 20%, #fff3bf 12%, transparent 13%),
+                        radial-gradient(circle at 15% 85%, #fff3bf 12%, transparent 13%),
+                        radial-gradient(circle at 88% 78%, #fff3bf 10%, transparent 11%);
+    }
+    .card-front span { font-size: 42px; line-height: 1; filter: drop-shadow(2px 3px 2px rgba(0,0,0,0.18)); transition: transform 0.2s; }
+    .card.matched .card-front { border-color: #51cf66; background-color: #eafff1; }
+    .card.matched .card-front span { animation: pop 0.45s ease; }
+
+    @keyframes dealPop {
+      0% { transform: translateY(-30px) scale(0.6) rotate(var(--spin, -6deg)); opacity: 0; }
+      60% { transform: translateY(4px) scale(1.06) rotate(var(--spin, 2deg)); }
+      100% { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
+    }
+    @keyframes matchPop {
+      0% { transform: rotateY(180deg) scale(1); }
+      35% { transform: rotateY(180deg) scale(1.22) rotate(-4deg); }
+      70% { transform: rotateY(180deg) scale(0.95); }
+      100% { transform: rotateY(180deg) scale(1); }
+    }
+    @keyframes nom {
+      0% { transform: rotateY(180deg) scale(1) rotate(0); opacity: 1; }
+      100% { transform: rotateY(180deg) scale(0) rotate(240deg); opacity: 0; }
+    }
+    @keyframes shake {
+      0%,100% { transform: rotateY(180deg) translateX(0) rotate(0); }
+      25% { transform: rotateY(180deg) translateX(-9px) rotate(-6deg); }
+      50% { transform: rotateY(180deg) translateX(9px) rotate(6deg); }
+      75% { transform: rotateY(180deg) translateX(-6px) rotate(-3deg); }
+    }
+    @keyframes bounceIn {
+      0% { transform: scale(0.3); opacity: 0; }
+      50% { transform: scale(1.15); }
+      70% { transform: scale(0.94); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes pop { 0% { transform: scale(0); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+    @keyframes wiggle { 0%,100% { transform: rotate(-2deg); } 50% { transform: rotate(2deg); } }
+
+    /* ===== Buttons ===== */
+    .controls { display: flex; justify-content: center; gap: 12px; margin-top: 2px; }
+    .btn {
+      font-family: 'Fredoka One', cursive; font-size: 15px; letter-spacing: 0.5px;
+      padding: 12px 30px; border: 3px solid #fff; border-radius: 22px; cursor: pointer;
+      background: linear-gradient(135deg, #ff6b9d, #ff4d6d); color: #fff;
+      text-shadow: 1px 2px 0 rgba(0,0,0,0.2);
+      box-shadow: 0 6px 0 #c2255c, 0 10px 18px rgba(0,0,0,0.18);
+      transition: transform 0.08s, box-shadow 0.08s;
+    }
+    .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #c2255c, 0 4px 8px rgba(0,0,0,0.15); }
+    .btn.green { background: linear-gradient(135deg, #69db7c, #2f9e44); box-shadow: 0 6px 0 #1b7f2e, 0 10px 18px rgba(0,0,0,0.18); }
+    .btn.green:active { box-shadow: 0 2px 0 #1b7f2e; }
+    .btn.ghost { background: #fff; color: #6c5ce7; text-shadow: none; box-shadow: 0 6px 0 #9c8ff0, 0 10px 18px rgba(0,0,0,0.1); }
+    .btn.ghost:active { box-shadow: 0 2px 0 #9c8ff0; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+    /* ===== FAB ===== */
+    .fab {
+      position: fixed; right: 18px; bottom: calc(104px + env(safe-area-inset-bottom, 0px));
+      z-index: 50; display: flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, #66d9e8, #38a1d8); color: #fff;
+      border: 4px solid #fff; border-radius: 22px; padding: 14px 20px; cursor: pointer;
+      font-size: 22px; font-family: 'Fredoka One', cursive;
+      box-shadow: 0 6px 0 #1971a8, 0 12px 24px rgba(0,0,0,0.25);
+      animation: wiggle 3.5s ease-in-out infinite;
+    }
+    .fab .fab-text { font-size: 15px; text-shadow: 1px 2px 0 rgba(0,0,0,0.2); }
+    .fab:active { animation: none; transform: translateY(4px); box-shadow: 0 2px 0 #1971a8; }
+    .fab:disabled { opacity: 0.5; }
+
+    /* ===== Bottom nav ===== */
+    .bottombar {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 55;
+      background: #fff;
+      border-top: 4px solid #ffd166;
+      padding: 6px 12px; padding-bottom: max(6px, env(safe-area-inset-bottom, 0px));
+      display: flex; justify-content: space-around;
+      box-shadow: 0 -6px 16px rgba(0,0,0,0.1);
+    }
+    .nav-item {
+      flex: 1; background: transparent; border: none; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      padding: 6px 0 4px; border-radius: 16px;
+      color: #b07a8a; font-size: 11px; font-weight: 800; font-family: 'Nunito', sans-serif;
+    }
+    .nav-item .icon { font-size: 24px; line-height: 1; }
+    .nav-item.active { color: #ff4d6d; }
+    .nav-item.active .icon { animation: pop 0.35s ease; background: #fff0f4; border-radius: 18px; padding: 3px 10px; }
+
+    /* ===== Dialogs ===== */
+    .overlay {
+      display: none; position: fixed; inset: 0; z-index: 100;
+      background: rgba(60, 20, 60, 0.5); justify-content: center; animation: fadeIn 0.25s ease;
+    }
+    .overlay.show { display: flex; align-items: center; }
+    .overlay.sheet.show { align-items: flex-end; }
+    .modal {
+      background: #fff; border: 5px solid #ffd166; border-radius: 32px;
+      padding: 26px 22px; width: min(92vw, 470px);
+      box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+      animation: bounceIn 0.4s ease; max-height: 86vh; overflow-y: auto; text-align: center;
+    }
+    .overlay.sheet .modal { border-radius: 32px 32px 0 0; border-bottom: none; width: 100%; max-width: 100%; max-height: 82vh; padding-bottom: calc(26px + env(safe-area-inset-bottom, 0px)); }
+    .modal h2 { font-family: 'Fredoka One', cursive; font-size: 24px; color: #ff4d6d; margin-bottom: 6px; text-shadow: 2px 2px 0 #ffd1d6; }
+    .modal p { font-size: 14px; font-weight: 800; color: #8a6aa0; margin-bottom: 14px; }
+    .trophy { font-size: 58px; margin-bottom: 4px; animation: bounceIn 0.6s ease; filter: drop-shadow(0 6px 4px rgba(0,0,0,0.2)); }
+
+    .stars-row { display: flex; justify-content: center; gap: 8px; margin: 12px 0; }
+    .stars-row .star-icon { font-size: 40px; filter: grayscale(1); opacity: 0.3; }
+    .stars-row .star-icon.lit { filter: none; opacity: 1; animation: bounceIn 0.45s ease; }
+
+    .stickers { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin: 10px 0 18px; }
+    .sticker {
+      aspect-ratio: 1; border-radius: 18px; border: 3px solid #eee; background: #faf3ff;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 800; color: #c0b0d0;
+    }
+    .sticker .e { font-size: 28px; line-height: 1; color: #d5c0de; }
+    .sticker .n { font-size: 8px; }
+    .sticker.collected { background: #fff0ff; border-color: #ffb3d9; animation: bounceIn 0.35s ease; box-shadow: 0 4px 0 rgba(255,105,180,0.2); }
+    .sticker.collected .e { color: #6c5ce7; filter: drop-shadow(1px 2px 1px rgba(0,0,0,0.15)); }
+    .sticker.collected .n { color: #ff4d6d; }
+
+    .stat-list { text-align: left; font-size: 14px; font-weight: 800; color: #6d4a6d; margin: 8px 0 18px; }
+    .stat-list div { padding: 9px 2px; border-bottom: 3px dotted #ffd1e0; }
+    .stat-list span { color: #ff4d6d; font-family: 'Fredoka One', cursive; float: right; font-variant-numeric: tabular-nums; }
+
+    /* ===== Snackbars ===== */
+    .toasts { position: fixed; left: 0; right: 0; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); z-index: 95; display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; }
+    .toast {
+      background: #4a2b4a; color: #ffd1dc; font-size: 13px; font-weight: 800;
+      padding: 11px 22px; border-radius: 999px; border: 2px solid #ffd166;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3); animation: bounceIn 0.25s ease; white-space: nowrap;
+    }
+
+    .stars-confetti { position: fixed; inset: 0; pointer-events: none; z-index: 101; }
+    .confetti { position: absolute; font-size: 30px; animation: starFall 1.5s ease-out forwards; }
+    @keyframes starFall {
+      0% { opacity: 1; transform: translateY(0) rotate(0) scale(1); }
+      100% { opacity: 0; transform: translateY(250px) rotate(540deg) scale(0.1); }
+    }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* ===== Splash / loading screen ===== */
+    .splash {
+      position: fixed; inset: 0; z-index: 300;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+      background: linear-gradient(160deg, #ff6b9d 0%, #b05be5 55%, #6c5ce7 100%);
+      overflow: hidden;
+      transition: opacity 0.55s ease, transform 0.55s ease;
+    }
+    .splash.hidden { opacity: 0; transform: scale(1.2); pointer-events: none; }
+    .splash .blob { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.09); pointer-events: none; }
+    .splash .b1 { width: 190px; height: 190px; top: -50px; left: -50px; }
+    .splash .b2 { width: 130px; height: 130px; bottom: -40px; right: -30px; background: rgba(255,255,255,0.06); }
+    .splash .b3 { width: 64px; height: 64px; top: 12%; right: 12%; background: rgba(255,255,255,0.12); animation: floaty 3s ease-in-out infinite; }
+    .splash .b4 { width: 40px; height: 40px; bottom: 18%; left: 10%; background: rgba(255,255,255,0.14); animation: floaty 3.4s ease-in-out infinite reverse; }
+    .splash-logo {
+      width: 128px; height: 128px; border-radius: 36px;
+      background: #fff; border: 5px solid #fff;
+      display: flex; align-items: center; justify-content: center; font-size: 76px;
+      box-shadow: 0 12px 0 rgba(0,0,0,0.16), 0 24px 48px rgba(0,0,0,0.28);
+      animation: splashBounce 1.4s ease-in-out infinite;
+    }
+    @keyframes splashBounce {
+      0%,100% { transform: rotate(-6deg) translateY(0); }
+      50% { transform: rotate(-6deg) translateY(-14px); }
+    }
+    .splash-title { font-family: 'Fredoka One', cursive; font-size: 44px; color: #fff; text-shadow: 4px 4px 0 rgba(0,0,0,0.22); letter-spacing: 1px; }
+    .splash-tag { font-weight: 800; color: rgba(255,255,255,0.9); font-size: 12px; letter-spacing: 3px; text-transform: uppercase; }
+    .splash-frame { width: min(68vw, 260px); height: 14px; border-radius: 999px; background: rgba(255,255,255,0.28); overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.18); }
+    .splash-fill { height: 100%; width: 0%; border-radius: 999px; background: linear-gradient(90deg, #fff3bf, #ffd43b); }
+    .splash-pct { font-family: 'Fredoka One', cursive; color: #fff; font-size: 20px; text-shadow: 1px 2px 0 rgba(0,0,0,0.2); font-variant-numeric: tabular-nums; }
+    .splash-msg { font-weight: 800; color: #fff; font-size: 13px; opacity: 0.92; min-height: 18px; }
+    .splash-hint { position: absolute; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); font-weight: 800; color: rgba(255,255,255,0.85); font-size: 12px; animation: bob 2s ease-in-out infinite; }
+
+    @media (max-width: 400px) {
+      .card-front span { font-size: 34px; }
+      .card-back::before { font-size: 24px; }
+      .appbar-title { font-size: 18px; }
+      .stickers { grid-template-columns: repeat(5, 1fr); }
+      .face { font-size: 44px; }
+    }
+  </style>
+</head>
+<body class="theme-animals">
+
+  <!-- Splash / loading screen -->
+  <div class="splash" id="splash">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+    <div class="blob b4"></div>
+    <div class="splash-logo" id="splashLogoEl">&#129513;</div>
+    <div class="splash-title">Memory Match!</div>
+    <div class="splash-tag">The cartoon memory game</div>
+    <div class="splash-frame"><div class="splash-fill" id="splashFill"></div></div>
+    <div class="splash-pct" id="splashPct">0%</div>
+    <div class="splash-msg" id="splashMsg">Shuffling the cards...</div>
+    <div class="splash-hint">Made for kids &#10084;</div>
+  </div>
+
+  <!-- Cartoon scenery -->
+  <svg class="scene" viewBox="0 0 1200 400" preserveAspectRatio="xMidYMax slice">
+    <g class="hills">
+      <ellipse class="hill-back" cx="260" cy="430" rx="460" ry="170"/>
+      <ellipse class="hill-front" cx="940" cy="440" rx="480" ry="190"/>
+    </g>
+    <g class="sun">
+      <circle cx="1065" cy="85" r="48" fill="#ffd93d"/>
+      <g stroke="#ffb703" stroke-width="7" stroke-linecap="round"></g>
+      <g stroke="#ffd93d" stroke-width="7" stroke-linecap="round">
+        <line x1="1065" y1="22" x2="1065" y2="10"/><line x1="1065" y1="148" x2="1065" y2="160"/>
+        <line x1="1002" y1="85" x2="990" y2="85"/><line x1="1128" y1="85" x2="1140" y2="85"/>
+        <line x1="1029" y1="49" x2="1020" y2="40"/><line x1="1101" y1="121" x2="1110" y2="130"/>
+        <line x1="1101" y1="49" x2="1110" y2="40"/><line x1="1029" y1="121" x2="1020" y2="130"/>
+      </g>
+      <circle cx="1052" cy="74" r="6" fill="#d92626"/>
+      <circle cx="1084" cy="74" r="6" fill="#d92626"/>
+      <path d="M1050 96 q16 14 32 0" stroke="#d92626" stroke-width="6" fill="none" stroke-linecap="round"/>
+    </g>
+    <g class="rainbow">
+      <path d="M40 310 A170 170 0 0 1 380 310" fill="none" stroke="#ff4d6d" stroke-width="16"/>
+      <path d="M56 310 A154 154 0 0 1 364 310" fill="none" stroke="#ffa94d" stroke-width="14"/>
+      <path d="M70 310 A140 140 0 0 1 350 310" fill="none" stroke="#ffd43b" stroke-width="14"/>
+      <path d="M84 310 A126 126 0 0 1 336 310" fill="none" stroke="#51cf66" stroke-width="14"/>
+    </g>
+    <g class="space-bits">
+      <circle cx="120" cy="110" r="30" fill="#ffd166"/>
+      <ellipse cx="120" cy="110" rx="46" ry="12" fill="none" stroke="#ffa94d" stroke-width="6" transform="rotate(-20 120 110)"/>
+      <circle cx="980" cy="200" r="18" fill="#a29bfe"/>
+      <circle cx="300" cy="90" r="4" fill="#fff"/><circle cx="520" cy="70" r="5" fill="#fff"/><circle cx="700" cy="120" r="4" fill="#fff"/>
+      <circle cx="880" cy="60" r="5" fill="#fff"/><circle cx="410" cy="180" r="4" fill="#fff"/>
+    </g>
+    <g class="dino-bits">
+      <polygon points="880,440 1010,240 1140,440" fill="#8d6e63"/>
+      <polygon points="905,440 1010,270 1010,440" fill="#5f4b3c"/>
+      <path d="M990 300 q15 18 0 34 q-15 -16 0 -34" fill="#e8590c"/>
+      <path d="M940 380 q30 40 140 40" stroke="#e8590c" stroke-width="10" fill="none" stroke-linecap="round" opacity="0.8"/>
+      <g transform="translate(180,330)">
+        <line x1="0" y1="0" x2="0" y2="-90" stroke="#8d6e63" stroke-width="12" stroke-linecap="round"/>
+        <path d="M0 -90 q-14 -58 -46 -66 q44 2 46 30 q30 -34 56 -10 q-36 6 -50 34 q34 -14 56 4 q-40 14 -62 8 z" fill="#2f9e44"/>
+      </g>
+      <g transform="translate(260,355) scale(0.75)">
+        <line x1="0" y1="0" x2="0" y2="-90" stroke="#8d6e63" stroke-width="12" stroke-linecap="round"/>
+        <path d="M0 -90 q-14 -58 -46 -66 q44 2 46 30 q30 -34 56 -10 q-36 6 -50 34 q34 -14 56 4 q-40 14 -62 8 z" fill="#2f9e44"/>
+      </g>
+    </g>
+  </svg>
+
+  <!-- Floating cartoon emojis -->
+  <div class="floaties">
+    <span class="f1">&#127880;</span>
+    <span class="f2">&#11088;</span>
+    <span class="f3">&#127800;</span>
+    <span class="f4">&#127775;</span>
+  </div>
+
+  <div class="stars-confetti" id="confetti"></div>
+  <div class="toasts" id="toasts"></div>
+
+  <!-- Status bar -->
+  <div class="statusbar">
+    <span id="sbTime">9:41</span>
+    <span class="sb-icons">
+      <svg viewBox="0 0 24 12" width="16" height="10"><rect x="0" y="7" width="3" height="5" rx="0.5"/><rect x="5" y="4" width="3" height="8" rx="0.5"/><rect x="10" y="2" width="3" height="10" rx="0.5"/><rect x="15" y="0" width="3" height="12" rx="0.5"/></svg>
+      <svg viewBox="0 0 24 16" width="14" height="11"><path d="M12 4.5C8.7 4.5 5.9 6 4 8.4l1.6 1.7C6.9 8.3 9.3 7.1 12 7.1s5.1 1.2 6.4 3L20 8.4C18.1 6 15.3 4.5 12 4.5z"/><path d="M12 8.4c-2 .5-3.6 1.8-4.5 3.4l1.6 1.7c.6-1.2 1.7-2 2.9-2.3 1.2.3 2.3 1.1 2.9 2.3l1.6-1.7c-.9-1.6-2.5-2.9-4.5-3.4z"/><circle cx="12" cy="13.5" r="1.6"/></svg>
+      <svg viewBox="0 0 25 12" width="22" height="11"><rect x="0" y="1" width="20" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.2"/><rect x="22" y="4" width="3" height="4" rx="1" fill="currentColor"/><rect x="1.8" y="2.8" width="16.4" height="6.4" rx="1.2" fill="currentColor" opacity="0.8"/></svg>
+    </span>
+  </div>
+
+  <!-- App bar -->
+  <header class="appbar">
+    <div class="appbar-title">
+      <div class="logo" id="logoEl">&#129513;</div>
+      <span>Memory Match!</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button class="icon-btn" id="settingsBtn" title="Settings">&#9881;</button>
+      <button class="icon-btn voice-on" id="voiceBtn" title="Toggle voice">&#128266;</button>
+      <span class="coin-badge">&#129473; <span id="coinDisplay">0</span></span>
+    </div>
+  </header>
+
+  <main class="content">
+    <div class="settings-summary" id="settingsSummary"></div>
+
+    <div class="mascot">
+      <div class="face" id="mascotFace">&#128521;</div>
+      <div class="bubble" id="bubble">Hiya! Tap the cards to play!</div>
+    </div>
+
+    <div class="scoreboard">
+      <div class="score-card"><div class="label">Moves</div><div class="value" id="moves">0</div></div>
+      <div class="score-card"><div class="label">Matches</div><div class="value" id="matches">0</div></div>
+      <div class="score-card"><div class="label">Time</div><div class="value" id="timer">0:00</div></div>
+    </div>
+
+    <div class="section-title">&#127380; &nbsp;Tap the cards to flip</div>
+    <div class="board" id="board"></div>
+
+    <div class="controls">
+      <button class="btn" id="restartBtn">New Game</button>
+    </div>
+  </main>
+
+  <button class="fab" id="hintBtn"><span class="fab-icon">&#128161;</span><span class="fab-text">Hint</span></button>
+
+  <!-- Bottom navigation -->
+  <nav class="bottombar">
+    <button class="nav-item active" id="navPlay"><span class="icon">&#129513;</span>Play</button>
+    <button class="nav-item" id="bookBtn"><span class="icon">&#128221;</span>Stickers</button>
+    <button class="nav-item" id="parentBtn"><span class="icon">&#128737;</span>Parents</button>
+  </nav>
+
+  <div class="overlay sheet" id="settingsOverlay">
+    <div class="modal">
+      <h2>Settings</h2>
+      <p>Pick how you want to play!</p>
+      <div class="set-group">
+        <div class="set-label">Theme</div>
+        <div class="set-grid" id="themeOptions"></div>
+      </div>
+      <div class="set-group">
+        <div class="set-label">Difficulty</div>
+        <div class="set-grid tri" id="diffOptions"></div>
+      </div>
+      <div class="controls" style="justify-content:center;">
+        <button class="btn" id="closeSettingsBtn">Let's Play!</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="winOverlay">
+    <div class="modal">
+      <div class="trophy">&#127942;</div>
+      <h2 id="winTitle">You Win!</h2>
+      <div class="stars-row" id="winStars"></div>
+      <p id="winMsg"></p>
+      <div class="controls" style="justify-content:center;">
+        <button class="btn" id="playAgainBtn">Play Again</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay sheet" id="bookOverlay">
+    <div class="modal">
+      <h2>My Sticker Book</h2>
+      <p>Every card you match turns into a sticker!</p>
+      <div class="stickers" id="stickerGrid"></div>
+      <div class="controls" style="justify-content:center;">
+        <button class="btn ghost" id="closeBookBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay sheet" id="statsOverlay">
+    <div class="modal">
+      <h2>Parent Zone</h2>
+      <div class="stat-list" id="statsList"></div>
+      <div class="controls" style="justify-content:center;align-items:center;flex-wrap:wrap;">
+        <button class="btn ghost" id="resetDataBtn">Reset Data</button>
+        <button class="btn" id="closeStatsBtn">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function setClock() {
+      const d = new Date();
+      let h = d.getHours();
+      const m = String(d.getMinutes()).padStart(2, '0');
+      document.getElementById('sbTime').textContent = h + ':' + m;
+    }
+
+    const THEMES = {
+      animals: [
+        ['🐱','cat'],['🐶','dog'],['🐼','panda'],['🐦','bird'],['🐸','frog'],['🦊','fox'],
+        ['🐷','pig'],['🐵','monkey'],['🐨','koala'],['🐰','rabbit'],['🦁','lion'],['🐢','turtle']
+      ],
+      food: [
+        ['🍎','apple'],['🍌','banana'],['🍕','pizza'],['🍩','donut'],['🍓','strawberry'],['🍦','ice cream'],
+        ['🍪','cookie'],['🍇','grapes'],['🍔','burger'],['🍍','pineapple'],['🍫','chocolate'],['🥕','carrot']
+      ],
+      space: [
+        ['🚀','rocket'],['🌟','star'],['🌙','moon'],['☀️','sun'],['🪐','planet'],['💫','comet'],
+        ['🌈','rainbow'],['🌍','earth'],['👽','alien'],['🛸','ufo'],['🔭','telescope'],['✨','sparkles']
+      ],
+      dino: [
+        ['🦖','dinosaur'],['🦕','long neck'],['🥚','egg'],['🦴','bone'],['🦎','lizard'],['🐊','crocodile'],
+        ['🌋','volcano'],['🌴','palm tree'],['🦇','bat'],['🐢','turtle'],['🪨','rock'],['💥','boom']
+      ]
+    };
+
+    const LS = {
+      get(k, d) { try { const v = localStorage.getItem('mm_' + k); return v === null ? d : JSON.parse(v); } catch(e) { return d; } },
+      set(k, v) { try { localStorage.setItem('mm_' + k, JSON.stringify(v)); } catch(e) {} }
+    };
+
+    const state = {
+      data: LS.get('data', { coins: 0, stickers: {}, best: {}, gamesPlayed: 0, gamesWon: 0, wrongFlips: 0, totalMoves: 0 }),
+      theme: 'animals', diff: 'easy',
+      voice: true,
+      deck: [], gridCols: 4, gridRows: 3,
+      flipped: [], matchedPairs: 0, totalPairs: 0, moves: 0, seconds: 0,
+      timer: null, gameStarted: false, locked: false, hintUsed: false, firstFlipAt: 0
+    };
+    const data = state.data;
+
+    const $ = id => document.getElementById(id);
+    const boardEl = $('board'), bubbleEl = $('bubble'), mascotFace = $('mascotFace');
+
+    const DIFFS = { easy: { cols: 4, rows: 3, label: 'Easy' }, medium: { cols: 4, rows: 4, label: 'Medium' }, hard: { cols: 6, rows: 4, label: 'Hard' } };
+
+    const audio = { ctx: null };
+    function tone(freq, dur, type, when, vol) {
+      audio.ctx = audio.ctx || new (window.AudioContext || window.webkitAudioContext)();
+      if (audio.ctx.state === 'suspended') audio.ctx.resume();
+      const o = audio.ctx.createOscillator(), g = audio.ctx.createGain();
+      o.type = type || 'sine'; o.frequency.value = freq;
+      g.gain.setValueAtTime(vol || 0.18, audio.ctx.currentTime + (when || 0));
+      g.gain.exponentialRampToValueAtTime(0.001, audio.ctx.currentTime + (when || 0) + dur);
+      o.connect(g); g.connect(audio.ctx.destination);
+      o.start(audio.ctx.currentTime + (when || 0)); o.stop(audio.ctx.currentTime + (when || 0) + dur);
+    }
+    function playSound(name) {
+      if (name === 'flip') tone(320, 0.09, 'triangle');
+      if (name === 'match') { tone(523, 0.12, 'triangle', 0); tone(784, 0.18, 'triangle', 0.1); }
+      if (name === 'miss') { tone(200, 0.25, 'sawtooth', 0, 0.12); tone(140, 0.3, 'sawtooth', 0.12, 0.12); }
+      if (name === 'hint') { tone(500, 0.1, 'triangle', 0); tone(660, 0.1, 'triangle', 0.1); tone(880, 0.2, 'triangle', 0.2); }
+      if (name === 'coin') tone(1200, 0.08, 'square', 0, 0.08);
+      if (name === 'win') { [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.25, 'triangle', i * 0.13)); }
+    }
+    function speak(text) {
+      if (!state.voice || !('speechSynthesis' in window)) return;
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = 0.95; u.pitch = 1.3;
+      speechSynthesis.cancel();
+      speechSynthesis.speak(u);
+    }
+
+    function mascot(emoji, text, cls) {
+      mascotFace.textContent = emoji;
+      mascotFace.classList.remove('celebrate', 'sad');
+      if (cls) mascotFace.classList.add(cls);
+      bubbleEl.textContent = text;
+      bubbleEl.className = 'bubble ' + (cls || '');
+    }
+    function toast(msg) {
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.textContent = msg.replace(/<[^>]+>/g, '');
+      $('toasts').appendChild(t);
+      setTimeout(() => t.remove(), 2000);
+    }
+    function addCoins(n) {
+      if (n > 0) { data.coins += n; $('coinDisplay').textContent = data.coins; LS.set('data', data); }
+    }
+    function confettiFrom(el, n) {
+      const rect = el.getBoundingClientRect();
+      const em = ['⭐','🌟','✨','💫','🎉'];
+      for (let i = 0; i < n; i++) {
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        c.textContent = em[Math.floor(Math.random() * em.length)];
+        c.style.left = (rect.left + rect.width / 2 + (Math.random() - 0.5) * 90) + 'px';
+        c.style.top = (rect.top + (Math.random() - 0.5) * 40) + 'px';
+        $('confetti').appendChild(c);
+        setTimeout(() => c.remove(), 1600);
+      }
+    }
+    function collectSticker(name) {
+      if (!data.stickers[state.theme]) data.stickers[state.theme] = {};
+      if (!data.stickers[state.theme][name]) {
+        data.stickers[state.theme][name] = true;
+        LS.set('data', data);
+        return true;
+      }
+      return false;
+    }
+
+    const THEME_META = {
+      animals: { e: '🐯', label: 'Animals', desc: 'Cats, dogs & pals' },
+      food: { e: '🍕', label: 'Food', desc: 'Yummy snacks' },
+      space: { e: '🚀', label: 'Space', desc: 'Rockets & stars' },
+      dino: { e: '🦖', label: 'Dino', desc: 'Roar! Volcanoes!' }
+    };
+    const DIFF_META = {
+      easy: { label: 'Easy', desc: '6 pairs' },
+      medium: { label: 'Medium', desc: '8 pairs' },
+      hard: { label: 'Hard', desc: '12 pairs' }
+    };
+
+    function updateSettingsSummary() {
+      const s = $('settingsSummary');
+      const t = THEME_META[state.theme], d = DIFF_META[state.diff];
+      $('logoEl').textContent = t.e;
+      s.innerHTML = '<span class="pill">' + t.e + ' ' + t.label + '</span>' +
+                    '<span class="pill">' + d.label + ' - ' + d.desc + '</span>' +
+                    '<span class="gear-hint">tap &#9881; to change</span>';
+    }
+
+    function buildSettings() {
+      const tg = $('themeOptions');
+      Object.keys(THEMES).forEach(t => {
+        const m = THEME_META[t];
+        const b = document.createElement('button');
+        b.className = 'option' + (t === state.theme ? ' active' : '');
+        b.innerHTML = '<div class="oe">' + m.e + '</div><div class="on">' + m.label + '</div><div class="od">' + m.desc + '</div>';
+        b.addEventListener('click', () => {
+          document.querySelectorAll('#themeOptions .option').forEach(x => x.classList.remove('active'));
+          b.classList.add('active');
+          state.theme = t;
+          document.body.className = 'theme-' + t;
+          updateSettingsSummary();
+          initGame(false);
+        });
+        tg.appendChild(b);
+      });
+
+      const dg = $('diffOptions');
+      Object.keys(DIFFS).forEach(dd => {
+        const m = DIFF_META[dd];
+        const b = document.createElement('button');
+        b.className = 'option' + (dd === state.diff ? ' active' : '');
+        b.innerHTML = '<div class="on">' + m.label + '</div><div class="od">' + m.desc + '</div>';
+        b.addEventListener('click', () => {
+          document.querySelectorAll('#diffOptions .option').forEach(x => x.classList.remove('active'));
+          b.classList.add('active');
+          state.diff = dd;
+          updateSettingsSummary();
+          initGame(false);
+        });
+        dg.appendChild(b);
+      });
+      updateSettingsSummary();
+    }
+
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const t = arr[i];
+        arr[i] = arr[j];
+        arr[j] = t;
+      }
+      return arr;
+    }
+
+    function initGame(announce) {
+      clearInterval(state.timer);
+      state.timer = null;
+      state.gameStarted = false; state.seconds = 0; state.moves = 0; state.matchedPairs = 0;
+      state.flipped = []; state.locked = false; state.hintUsed = false; state.streak = 0;
+      $('hintBtn').disabled = false;
+      $('moves').textContent = '0'; $('matches').textContent = '0'; $('timer').textContent = '0:00';
+
+      const g = DIFFS[state.diff];
+      state.gridCols = g.cols; state.gridRows = g.rows;
+      const numCards = g.cols * g.rows;
+      state.totalPairs = numCards / 2;
+      const picked = shuffle(THEMES[state.theme].slice()).slice(0, state.totalPairs);
+      state.deck = shuffle(picked.concat(picked));
+
+      boardEl.style.gridTemplateColumns = `repeat(${g.cols}, 1fr)`;
+      boardEl.innerHTML = '';
+      state.deck.forEach((card, i) => {
+        const el = document.createElement('div');
+        el.className = 'card';
+        el.dataset.index = i;
+        el.dataset.emoji = card[0];
+        el.dataset.name = card[1];
+        el.innerHTML = '<div class="card-back"></div><div class="card-front"><span>' + card[0] + '</span></div>';
+        el.style.animationDelay = (Math.random() * 0.6).toFixed(2) + 's';
+        el.style.setProperty('--spin', (Math.random() * 60 - 30).toFixed(0) + 'deg');
+        el.addEventListener('click', () => flipCard(el));
+        boardEl.appendChild(el);
+      });
+
+      $('coinDisplay').textContent = data.coins;
+      if (announce) {
+        mascot('🙂', 'Ready... set... GO!', 'celebrate');
+        playSound('coin');
+        speak('Ready, set, go!');
+      } else {
+        mascot('🙂', 'New game! Find all the pairs!');
+      }
+    }
+
+    function flipCard(card) {
+      if (state.locked) return;
+      if (card.classList.contains('flipped') || card.classList.contains('matched')) return;
+      if (state.flipped.length >= 2) return;
+
+      if (!state.gameStarted) {
+        state.gameStarted = true;
+        state.timer = setInterval(() => {
+          state.seconds++;
+          $('timer').textContent = Math.floor(state.seconds / 60) + ':' + String(state.seconds % 60).padStart(2, '0');
+        }, 1000);
+      }
+
+      if (state.flipped.length === 0) {
+        state.firstFlipAt = Date.now();
+      }
+
+      playSound('flip');
+      card.classList.add('flipped');
+      state.flipped.push(card);
+      if (state.voice) speak(card.dataset.name);
+
+      if (state.flipped.length === 2) {
+        state.moves++;
+        data.totalMoves++;
+        LS.set('data', data);
+        $('moves').textContent = state.moves;
+        checkMatch();
+      }
+    }
+
+    function checkMatch() {
+      const [a, b] = state.flipped;
+      const fast = Date.now() - state.firstFlipAt < 2500;
+
+      if (a.dataset.emoji === b.dataset.emoji) {
+        a.classList.add('matched'); b.classList.add('matched');
+        state.matchedPairs++; $('matches').textContent = state.matchedPairs;
+        state.flipped = [];
+        playSound('match');
+        mascot('😄', 'Yay! Match!', 'celebrate');
+        confettiFrom(a, 4); confettiFrom(b, 4);
+
+        const newSticker = collectSticker(a.dataset.name);
+        if (newSticker) { toast('📌 New sticker: ' + a.dataset.name); }
+        if (fast) {
+          state.streak++;
+          if (state.streak >= 2) { toast('🔥 Streak x' + state.streak + '!'); playSound('coin'); }
+          addCoins(1 + (state.streak > 2 ? state.streak : 0));
+        } else {
+          state.streak = 0;
+          mascot('🐌', 'Too slow! You still matched though!');
+          toast('🐌 Too slow this time!');
+        }
+
+        setTimeout(() => { a.classList.add('nom'); b.classList.add('nom'); }, 450);
+        if (state.matchedPairs === state.totalPairs) {
+          clearInterval(state.timer);
+          setTimeout(showWin, 700);
+        }
+      } else {
+        data.wrongFlips++;
+        LS.set('data', data);
+        playSound('miss');
+        state.streak = 0;
+        state.locked = true;
+        a.classList.add('wrong'); b.classList.add('wrong');
+        mascot('😟', 'Uh oh, not a match!', 'sad');
+        speak('Not a match!');
+        setTimeout(() => {
+          a.classList.remove('flipped', 'wrong'); b.classList.remove('flipped', 'wrong');
+          state.flipped = [];
+          state.locked = false;
+        }, 800);
+      }
+    }
+
+    function showWin() {
+      playSound('win');
+      const bestP = data.best[state.diff] || Infinity;
+      let stars;
+      if (state.moves <= state.totalPairs + 2) stars = 3;
+      else if (state.moves <= state.totalPairs + 5) stars = 2;
+      else stars = 1;
+      if (state.moves < bestP) { data.best[state.diff] = state.moves; }
+      data.gamesPlayed++; data.gamesWon++;
+      const bonus = stars + state.streak;
+      addCoins(bonus);
+      LS.set('data', data);
+
+      $('winTitle').textContent = 'You Win!';
+      let msg = 'Finished in <strong>' + state.moves + '</strong> moves and <strong>' + $('timer').textContent + '</strong>';
+      msg += '<br>New best: <strong>' + state.moves + '</strong> moves on ' + DIFFS[state.diff].label;
+      msg += '<br>Coins earned: <strong>+' + bonus + '</strong>';
+      $('winMsg').innerHTML = msg;
+
+      const sw = $('winStars');
+      sw.innerHTML = '';
+      for (let i = 1; i <= 3; i++) {
+        const s = document.createElement('div');
+        s.className = 'star-icon' + (i <= stars ? ' lit' : '');
+        s.textContent = '⭐';
+        s.style.animationDelay = (i * 0.15) + 's';
+        sw.appendChild(s);
+      }
+      mascot(stars === 3 ? '🤩' : stars === 2 ? '😎' : '😊', stars === 3 ? 'WOW! Perfect!!!' : stars === 2 ? 'Great job!' : 'Good work!', 'celebrate');
+      $('hintBtn').disabled = false;
+      $('winOverlay').classList.add('show');
+      confettiFrom(boardEl, 20);
+      speak('Congratulations! ' + stars + ' stars!');
+    }
+
+    $('playAgainBtn').addEventListener('click', () => { $('winOverlay').classList.remove('show'); initGame(true); });
+    $('restartBtn').addEventListener('click', () => initGame(true));
+
+    $('hintBtn').addEventListener('click', () => {
+      if (state.hintUsed || state.locked) return;
+      state.hintUsed = true;
+      $('hintBtn').disabled = true;
+      playSound('hint');
+      mascot('👀', 'Peek peek! Remember them!', 'celebrate');
+      toast('👀 Hint used!');
+      const cards = boardEl.querySelectorAll('.card:not(.flipped):not(.matched)');
+      cards.forEach(c => c.classList.add('hint'));
+      state.locked = true;
+      setTimeout(() => {
+        cards.forEach(c => c.classList.remove('hint'));
+        state.locked = false;
+      }, 1300);
+    });
+
+    $('voiceBtn').addEventListener('click', () => {
+      state.voice = !state.voice;
+      $('voiceBtn').classList.toggle('voice-on', state.voice);
+      $('voiceBtn').innerHTML = state.voice ? '&#128266;' : '&#128264;';
+      if (state.voice) toast('🔊 Voice on'); else toast('🔇 Voice off');
+    });
+
+    function openBook() {
+      const grid = $('stickerGrid');
+      grid.innerHTML = '';
+      Object.keys(THEMES).forEach(t => {
+        THEMES[t].forEach(([e, n]) => {
+          const d = document.createElement('div');
+          const got = !!(data.stickers[t] && data.stickers[t][n]);
+          d.className = 'sticker' + (got ? ' collected' : '');
+          d.innerHTML = got ? '<div class="e">' + e + '</div><div class="n">' + n + '</div>' : '<div class="e">?</div><div class="n"></div>';
+          grid.appendChild(d);
+        });
+      });
+      $('bookOverlay').classList.add('show');
+    }
+    $('bookBtn').addEventListener('click', () => { openBook(); });
+    $('closeBookBtn').addEventListener('click', () => $('bookOverlay').classList.remove('show'));
+
+    function openStats() {
+      const stickersOwned = Object.values(data.stickers).reduce((sum, t) => sum + Object.keys(t).length, 0);
+      const totalStickers = Object.keys(THEMES).length * THEMES[Object.keys(THEMES)[0]].length;
+      const list = $('statsList');
+      const bestRows = Object.keys(DIFFS).map(d => '<div>Best moves - ' + DIFFS[d].label + ' <span>' + (data.best[d] || '—') + '</span></div>').join('');
+      list.innerHTML =
+        '<div>Games played <span>' + data.gamesPlayed + '</span></div>' +
+        '<div>Games won <span>' + data.gamesWon + '</span></div>' +
+        '<div>Total moves <span>' + data.totalMoves + '</span></div>' +
+        '<div>Wrong flips <span>' + data.wrongFlips + '</span></div>' +
+        '<div>Stickers collected <span>' + stickersOwned + ' / ' + totalStickers + '</span></div>' +
+        '<div>Coins <span>' + data.coins + '</span></div>' + bestRows;
+      $('statsOverlay').classList.add('show');
+    }
+    $('parentBtn').addEventListener('click', () => { openStats(); });
+    $('closeStatsBtn').addEventListener('click', () => $('statsOverlay').classList.remove('show'));
+
+    $('navPlay').addEventListener('click', () => {
+      ['navPlay', 'bookBtn', 'parentBtn'].forEach(id => $('navPlay').classList.remove('active'));
+      $('navPlay').classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    $('bookBtn').addEventListener('click', () => {
+      $('bookBtn').classList.add('active'); $('navPlay').classList.remove('active'); $('parentBtn').classList.remove('active');
+    });
+    $('parentBtn').addEventListener('click', () => {
+      $('parentBtn').classList.add('active'); $('navPlay').classList.remove('active'); $('bookBtn').classList.remove('active');
+    });
+    $('closeBookBtn').addEventListener('click', () => { $('navPlay').classList.add('active'); $('bookBtn').classList.remove('active'); });
+    $('closeStatsBtn').addEventListener('click', () => { $('navPlay').classList.add('active'); $('parentBtn').classList.remove('active'); });
+
+    $('resetDataBtn').addEventListener('click', () => {
+      if (confirm('Delete ALL progress, coins and stickers?')) {
+        data.coins = 0; data.stickers = {}; data.best = {};
+        data.gamesPlayed = 0; data.gamesWon = 0; data.wrongFlips = 0; data.totalMoves = 0;
+        LS.set('data', data);
+        $('coinDisplay').textContent = '0';
+        toast('🗑️ All data reset!');
+        initGame(false);
+        openStats();
+      }
+    });
+
+    /* ===== Splash / loading sequence ===== */
+function runSplash() {
+  const fill = $('splashFill'), pct = $('splashPct'), msg = $('splashMsg');
+  const lines = [
+    'Shuffling the cards...',
+    'Waking the monkeys...',
+    'Loading the donuts...',
+    'Firing up the rockets...',
+    'Calling the dinosaurs...',
+    'Ready to play!'
+  ];
+  const duration = 2600;
+  const start = performance.now();
+  function frame(now) {
+    const p = Math.min(1, (now - start) / duration);
+    const eased = 1 - Math.pow(1 - p, 3);
+    fill.style.width = (eased * 100) + '%';
+    pct.textContent = Math.round(eased * 100) + '%';
+    msg.textContent = lines[Math.min(lines.length - 1, Math.floor(eased * lines.length))];
+    if (p < 1) {
+      requestAnimationFrame(frame);
+    } else {
+      setTimeout(() => {
+        const s = $('splash');
+        s.classList.add('hidden');
+        speak('Welcome to Memory Match!');
+        setTimeout(() => s.remove(), 600);
+      }, 250);
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+$('settingsBtn').addEventListener('click', () => $('settingsOverlay').classList.add('show'));
+    $('closeSettingsBtn').addEventListener('click', () => $('settingsOverlay').classList.remove('show'));
+    $('settingsOverlay').addEventListener('click', (e) => {
+      if (e.target === $('settingsOverlay')) $('settingsOverlay').classList.remove('show');
+    });
+
+    buildSettings();
+    document.body.className = 'theme-' + state.theme;
+    $('coinDisplay').textContent = data.coins;
+    $('logoEl').textContent = THEME_META[state.theme].e;
+    $('splashLogoEl').textContent = THEME_META[state.theme].e;
+    initGame(false);
+    setClock();
+    setInterval(setClock, 15000);
+    runSplash();
+  </script>
+</body>
+</html>

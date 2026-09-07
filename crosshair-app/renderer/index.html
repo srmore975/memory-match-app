@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+<title>CrossOnScreen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="stage" class="stage">
+    <div id="scrim" class="scrim"></div>
+
+    <div id="crosshairWrap" class="crosshair-wrap">
+      <svg id="crosshair" viewBox="0 0 100 100" width="100" height="100" style="overflow: visible" aria-hidden="true"></svg>
+    </div>
+
+    <section id="settings" class="settings glass" aria-label="Crosshair settings">
+      <header class="panel-head">
+        <div>
+          <div class="brand">CROSS<span>ONSCREEN</span></div>
+          <div class="subhead">FPS overlay · click-through</div>
+        </div>
+        <button id="btnClose" class="icon-btn" title="Close (Ctrl+F12)">✕</button>
+      </header>
+
+      <div class="panel-scroll">
+        <div class="group">
+          <div class="group-title">STYLE</div>
+          <div id="styles" class="chips"></div>
+        </div>
+
+        <div class="group">
+          <div class="group-title">NEON PALETTE</div>
+          <div id="presets" class="swatches"></div>
+          <div class="row">
+            <label class="lbl" for="color">Primary</label>
+            <input type="color" id="color" />
+            <label class="lbl" for="accent">Accent</label>
+            <input type="color" id="accent" />
+          </div>
+        </div>
+
+        <div id="sliders" class="group"></div>
+
+        <div class="group">
+          <div class="group-title">BEHAVIOR</div>
+
+          <div class="row">
+            <label class="lbl" for="outline">Dark outline</label>
+            <label class="switch" for="outline">
+              <input type="checkbox" id="outline" />
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="row">
+            <label class="lbl">Monitor</label>
+            <select id="display" class="select"></select>
+          </div>
+
+          <div class="row">
+            <label class="lbl" for="toggleHotkey">Overlay hotkey</label>
+            <input type="text" id="toggleHotkey" class="hotkey" spellcheck="false" />
+          </div>
+          <div class="row">
+            <label class="lbl" for="settingsHotkey">Settings hotkey</label>
+            <input type="text" id="settingsHotkey" class="hotkey" spellcheck="false" />
+          </div>
+        </div>
+      </div>
+
+      <footer class="panel-foot">
+        <button id="btnHide" class="btn ghost">Hide</button>
+        <button id="btnReset" class="btn ghost">Reset</button>
+        <button id="btnQuit" class="btn quit">Quit app</button>
+      </footer>
+
+      <div id="toast" class="toast"></div>
+    </section>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

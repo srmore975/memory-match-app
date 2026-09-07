@@ -1,0 +1,20 @@
+# Temp / OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Unrelated projects in this folder
+ascend/
+ascend app/
+ascend-android/
+
+# Android build artifacts (in-progress)
+MemoryMatchApp/
+.gradle/
+build/
+local.properties
+*.keystore
+keystore.properties
+
+# Node
+node_modules/
