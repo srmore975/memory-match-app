@@ -1,6 +1,6 @@
 # Publishing Guide — Memory Match! Cartoon Fun (with AdMob)
 
-This is an HTML5/PWA game wrapped in a WebView Android app (package `com.legacy.memorymatchgame`). It monetizes with **AdMob** ads. Below is the full end-to-end path to production.
+This is an HTML5/PWA game wrapped in a WebView Android app (package `com.legacy.memorymatchcartoonfun`). It monetizes with **AdMob** ads. Below is the full end-to-end path to production.
 
 > **Prereq:** an AdMob account and a Play Console developer account, both using the same Google account (srmore975@gmail.com). A .aab build (`MemoryMatchApp\dist\MemoryMatch-Game-v1.0-ads.aab`) is already produced for you.
 
@@ -9,7 +9,7 @@ This is an HTML5/PWA game wrapped in a WebView Android app (package `com.legacy.
 ## Part 0 — One-time AdMob setup (do this FIRST)
 
 1. Go to **admob.google.com** and sign in with **srmore975@gmail.com**.
-2. **Apps → Add app → Android →** enter package **`com.legacy.memorymatchgame`** → link it to the Play listing when prompted.
+2. **Apps → Add app → Android →** enter package **`com.legacy.memorymatchcartoonfun`** → link it to the Play listing when prompted.
 3. **App settings →** complete the **"Apps with children"** questionnaire → this makes Google only allow **family-safe ad networks**.
 4. Create **two ad units**:
    - **Banner** (320×50 adaptive) — name "Game Banner"
