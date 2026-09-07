@@ -557,7 +557,29 @@
     </div>
   </div>
 
+  <div class="overlay" id="confirmOverlay">
+    <div class="modal" style="max-width:320px;">
+      <h2 style="text-align:center;">Are you sure?</h2>
+      <p id="confirmMsg" style="text-align:center;color:#666;">Delete ALL progress, coins and stickers?</p>
+      <div class="controls" style="justify-content:center;">
+        <button class="btn ghost" id="confirmNoBtn">Cancel</button>
+        <button class="btn" id="confirmYesBtn">Yes, reset</button>
+      </div>
+    </div>
+  </div>
+
   <script>
+    let pendingReset = null;
+    async function uiConfirm(message) {
+      return new Promise(resolve => {
+        $('confirmMsg').textContent = message;
+        $('confirmOverlay').classList.add('show');
+        pendingReset = resolve;
+      });
+    }
+    document.getElementById('confirmNoBtn').addEventListener('click', () => { pendingReset && pendingReset(false); pendingReset = null; document.getElementById('confirmOverlay').classList.remove('show'); });
+    document.getElementById('confirmYesBtn').addEventListener('click', () => { pendingReset && pendingReset(true); pendingReset = null; document.getElementById('confirmOverlay').classList.remove('show'); });
+
     const THEMES = {
       animals: [
         ['🐱','cat'],['🐶','dog'],['🐼','panda'],['🐦','bird'],['🐸','frog'],['🦊','fox'],
@@ -972,16 +994,16 @@
     $('closeBookBtn').addEventListener('click', () => { $('navPlay').classList.add('active'); $('bookBtn').classList.remove('active'); });
     $('closeStatsBtn').addEventListener('click', () => { $('navPlay').classList.add('active'); $('parentBtn').classList.remove('active'); });
 
-    $('resetDataBtn').addEventListener('click', () => {
-      if (confirm('Delete ALL progress, coins and stickers?')) {
-        data.coins = 0; data.stickers = {}; data.best = {};
-        data.gamesPlayed = 0; data.gamesWon = 0; data.wrongFlips = 0; data.totalMoves = 0;
-        LS.set('data', data);
-        $('coinDisplay').textContent = '0';
-        toast('🗑️ All data reset!');
-        initGame(false);
-        openStats();
-      }
+    $('resetDataBtn').addEventListener('click', async () => {
+      const ok = await uiConfirm('Delete ALL progress, coins and stickers?');
+      if (!ok) return;
+      data.coins = 0; data.stickers = {}; data.best = {};
+      data.gamesPlayed = 0; data.gamesWon = 0; data.wrongFlips = 0; data.totalMoves = 0;
+      LS.set('data', data);
+      $('coinDisplay').textContent = '0';
+      toast('🗑️ All data reset!');
+      initGame(false);
+      openStats();
     });
 
     /* ===== Splash / loading sequence ===== */
