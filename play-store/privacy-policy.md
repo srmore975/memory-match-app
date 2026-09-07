@@ -2,10 +2,6 @@
 
 _Last updated: September 7, 2026_
 
-> **Before publishing:** replace every `[ ]` placeholder below (contact email and website) with your real information. This policy must then be hosted at a public URL and pasted into the Google Play Console (Store presence → App content → Privacy policy).
-
----
-
 ## 1. Overview
 
 Memory Match! Cartoon Fun ("the App") is a single-player memory matching game designed for children. We respect the privacy of every family and child who plays. This policy explains, in simple terms, what information the App collects and how it is handled.
@@ -103,4 +99,3 @@ If you have questions about this privacy policy or the App, contact:
 
 - **Legacy Co.**
 - Email: **srmore975@gmail.com**
-- Website: **https://legacyco.example** (replace with your real site)
